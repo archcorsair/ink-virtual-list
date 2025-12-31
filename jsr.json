@@ -1,5 +1,9 @@
 {
   "name": "@archcorsair/ink-virtual-list",
   "version": "0.1.0",
-  "exports": "./src/index.ts"
+  "exports": "./src/index.ts",
+  "imports": {
+    "ink": "npm:ink@^6.6.0",
+    "react": "npm:react@^19.2.3"
+  }
 }
