@@ -1,0 +1,59 @@
+{
+  "name": "ink-virtual-list",
+  "version": "0.1.0",
+  "description": "A virtualized list component for Ink terminal applications",
+  "type": "module",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "bunup",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "prepublishOnly": "bun run build",
+    "publish:npm": "npm publish",
+    "publish:jsr": "bun run build && npx jsr publish",
+    "version:patch": "bun pm version patch",
+    "version:minor": "bun pm version minor",
+    "version:major": "bun pm version major"
+  },
+  "keywords": [
+    "ink",
+    "react",
+    "cli",
+    "terminal",
+    "tui",
+    "virtual-list",
+    "virtualized",
+    "scrolling"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/archcorsair/ink-virtual-list"
+  },
+  "peerDependencies": {
+    "ink": "^6.6.0",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.10",
+    "@types/bun": "latest",
+    "@types/react": "^19.2.7",
+    "bunup": "^0.16.17",
+    "typescript": "^5.9.3"
+  }
+}
