@@ -1,6 +1,6 @@
 {
   "name": "ink-virtual-list",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A virtualized list component for Ink terminal applications",
   "type": "module",
   "files": [
@@ -18,6 +18,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "test": "bun test --only-failures",
     "build": "bunup",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
@@ -54,6 +55,7 @@
     "@types/bun": "latest",
     "@types/react": "^19.2.7",
     "bunup": "^0.16.17",
+    "ink-testing-library": "^4.0.0",
     "typescript": "^5.9.3"
   }
 }

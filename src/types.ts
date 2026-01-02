@@ -47,6 +47,8 @@ export interface VirtualListProps<T> {
 
   /** Whether to show "N more" indicators when items overflow (default: true) */
   showOverflowIndicators?: boolean;
+  /** Minimum overflow count before showing indicators (default: 1) */
+  overflowIndicatorThreshold?: number;
   /** Custom renderer for the top overflow indicator */
   renderOverflowTop?: (count: number) => ReactNode;
   /** Custom renderer for the bottom overflow indicator */

@@ -6,6 +6,29 @@ import { useTerminalSize } from "./useTerminalSize";
 const DEFAULT_HEIGHT = 10;
 const DEFAULT_ITEM_HEIGHT = 1;
 
+/**
+ * Attempts to extract a stable key from an item.
+ * Checks for 'id' or 'key' properties on objects before falling back to index.
+ */
+function getDefaultKey<T>(item: T, index: number): string {
+  if (item && typeof item === "object") {
+    const obj = item as Record<string, unknown>;
+    if ("id" in obj && (typeof obj.id === "string" || typeof obj.id === "number")) {
+      return String(obj.id);
+    }
+    if ("key" in obj && (typeof obj.key === "string" || typeof obj.key === "number")) {
+      return String(obj.key);
+    }
+  }
+  return String(index);
+}
+
+export function validateItemHeight(itemHeight: number): void {
+  if (!Number.isInteger(itemHeight) || itemHeight < 1) {
+    throw new Error(`[ink-virtual-list] itemHeight must be a positive integer, got: ${itemHeight}`);
+  }
+}
+
 function calculateViewportOffset(selectedIndex: number, currentOffset: number, visibleCount: number): number {
   // Selection above viewport - scroll up
   if (selectedIndex < currentOffset) {
@@ -31,11 +54,15 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
     reservedLines = 0,
     itemHeight = DEFAULT_ITEM_HEIGHT,
     showOverflowIndicators = true,
+    overflowIndicatorThreshold = 1,
     renderOverflowTop,
     renderOverflowBottom,
     renderScrollBar,
     onViewportChange,
   } = props;
+
+  // Validate itemHeight
+  validateItemHeight(itemHeight);
 
   const { rows: terminalRows } = useTerminalSize();
 
@@ -60,32 +87,23 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
   // Clamp selectedIndex to valid range
   const clampedSelectedIndex = Math.max(0, Math.min(selectedIndex, items.length - 1));
 
-  // Calculate viewport offset - use useMemo to derive from selectedIndex
-  // This ensures the viewport is always in sync with selection
-  const calculatedOffset = useMemo(() => {
+  // Lazy initial offset - positions selection at bottom of viewport if needed
+  const [viewportOffset, setViewportOffset] = useState(() => {
     if (items.length === 0) return 0;
-
     const maxOffset = Math.max(0, items.length - visibleCount);
-
-    // Calculate what offset would show the selected item
-    let offset = 0;
-
-    // Selection below viewport - scroll down
     if (clampedSelectedIndex >= visibleCount) {
-      offset = clampedSelectedIndex - visibleCount + 1;
+      return Math.min(clampedSelectedIndex - visibleCount + 1, maxOffset);
     }
+    return 0;
+  });
 
-    return Math.min(Math.max(0, offset), maxOffset);
-  }, [items.length, visibleCount, clampedSelectedIndex]);
-
-  const [viewportOffset, setViewportOffset] = useState(calculatedOffset);
-
-  // Sync viewportOffset when selection changes
+  // Sync viewport when selection changes
   useEffect(() => {
-    const newOffset = calculateViewportOffset(clampedSelectedIndex, viewportOffset, visibleCount);
-    if (newOffset !== viewportOffset) {
-      const maxOffset = Math.max(0, items.length - visibleCount);
-      setViewportOffset(Math.min(newOffset, maxOffset));
+    const maxOffset = Math.max(0, items.length - visibleCount);
+    const targetOffset = calculateViewportOffset(clampedSelectedIndex, viewportOffset, visibleCount);
+    const clampedOffset = Math.min(Math.max(0, targetOffset), maxOffset);
+    if (clampedOffset !== viewportOffset) {
+      setViewportOffset(clampedOffset);
     }
   }, [clampedSelectedIndex, viewportOffset, visibleCount, items.length]);
 
@@ -165,11 +183,11 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
 
   return (
     <Box flexDirection="column">
-      {showOverflowIndicators && overflowTop > 0 && topIndicator(overflowTop)}
+      {showOverflowIndicators && overflowTop >= overflowIndicatorThreshold && topIndicator(overflowTop)}
 
       {visibleItems.map((item, idx) => {
         const actualIndex = viewportOffset + idx;
-        const key = keyExtractor ? keyExtractor(item, actualIndex) : String(actualIndex);
+        const key = keyExtractor ? keyExtractor(item, actualIndex) : getDefaultKey(item, actualIndex);
 
         const itemProps: RenderItemProps<T> = {
           item,
@@ -177,10 +195,14 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
           isSelected: actualIndex === clampedSelectedIndex,
         };
 
-        return <Box key={key}>{renderItem(itemProps)}</Box>;
+        return (
+          <Box key={key} height={resolvedItemHeight} overflow="hidden">
+            {renderItem(itemProps)}
+          </Box>
+        );
       })}
 
-      {showOverflowIndicators && overflowBottom > 0 && bottomIndicator(overflowBottom)}
+      {showOverflowIndicators && overflowBottom >= overflowIndicatorThreshold && bottomIndicator(overflowBottom)}
 
       {renderScrollBar?.(viewport)}
     </Box>
