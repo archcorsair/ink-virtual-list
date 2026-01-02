@@ -37,6 +37,7 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
     reservedLines = 0,
     itemHeight = DEFAULT_ITEM_HEIGHT,
     showOverflowIndicators = true,
+    overflowIndicatorThreshold = 1,
     renderOverflowTop,
     renderOverflowBottom,
     renderScrollBar,
@@ -174,7 +175,7 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
 
   return (
     <Box flexDirection="column">
-      {showOverflowIndicators && overflowTop > 0 && topIndicator(overflowTop)}
+      {showOverflowIndicators && overflowTop >= overflowIndicatorThreshold && topIndicator(overflowTop)}
 
       {visibleItems.map((item, idx) => {
         const actualIndex = viewportOffset + idx;
@@ -193,7 +194,7 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
         );
       })}
 
-      {showOverflowIndicators && overflowBottom > 0 && bottomIndicator(overflowBottom)}
+      {showOverflowIndicators && overflowBottom >= overflowIndicatorThreshold && bottomIndicator(overflowBottom)}
 
       {renderScrollBar?.(viewport)}
     </Box>

@@ -39,6 +39,26 @@ describe("VirtualList", () => {
     const lines = frame.split("\n").filter(Boolean);
     expect(lines.length).toBeLessThanOrEqual(2);
   });
+
+  test("hides overflow indicators below threshold", () => {
+    const items = Array.from({ length: 10 }, (_, i) => `Item ${i}`);
+    const { lastFrame } = render(
+      <VirtualList
+        items={items}
+        height={5}
+        showOverflowIndicators={true}
+        overflowIndicatorThreshold={3}
+        renderItem={({ item }) => <Text>{item}</Text>}
+      />,
+    );
+
+    const frame = lastFrame() ?? "";
+    // With height=5, indicators take 2 lines, 3 items visible
+    // overflowTop = 0, overflowBottom = 7
+    // Threshold is 3, so bottom should show (7 >= 3), top should not (0 < 3)
+    expect(frame).toContain("▼");
+    expect(frame).not.toContain("▲");
+  });
 });
 
 describe("validateItemHeight", () => {
