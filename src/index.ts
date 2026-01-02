@@ -6,4 +6,4 @@ export type {
 } from "./types";
 export type { TerminalSize } from "./useTerminalSize";
 export { useTerminalSize } from "./useTerminalSize";
-export { VirtualList } from "./VirtualList";
+export { VirtualList, validateItemHeight } from "./VirtualList";

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Text } from "ink";
 import { render } from "ink-testing-library";
-import { VirtualList } from "../src";
+import { VirtualList, validateItemHeight } from "../src";
 
 describe("VirtualList", () => {
   test("renders visible items", () => {
@@ -38,5 +38,25 @@ describe("VirtualList", () => {
     // Both items should be on separate lines, not wrapped
     const lines = frame.split("\n").filter(Boolean);
     expect(lines.length).toBeLessThanOrEqual(2);
+  });
+});
+
+describe("validateItemHeight", () => {
+  test("throws on itemHeight of 0", () => {
+    expect(() => validateItemHeight(0)).toThrow("itemHeight must be a positive integer");
+  });
+
+  test("throws on negative itemHeight", () => {
+    expect(() => validateItemHeight(-1)).toThrow("itemHeight must be a positive integer");
+  });
+
+  test("throws on non-integer itemHeight", () => {
+    expect(() => validateItemHeight(1.5)).toThrow("itemHeight must be a positive integer");
+  });
+
+  test("accepts valid positive integers", () => {
+    expect(() => validateItemHeight(1)).not.toThrow();
+    expect(() => validateItemHeight(5)).not.toThrow();
+    expect(() => validateItemHeight(100)).not.toThrow();
   });
 });

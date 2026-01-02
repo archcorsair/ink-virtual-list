@@ -6,6 +6,12 @@ import { useTerminalSize } from "./useTerminalSize";
 const DEFAULT_HEIGHT = 10;
 const DEFAULT_ITEM_HEIGHT = 1;
 
+export function validateItemHeight(itemHeight: number): void {
+  if (!Number.isInteger(itemHeight) || itemHeight < 1) {
+    throw new Error(`[ink-virtual-list] itemHeight must be a positive integer, got: ${itemHeight}`);
+  }
+}
+
 function calculateViewportOffset(selectedIndex: number, currentOffset: number, visibleCount: number): number {
   // Selection above viewport - scroll up
   if (selectedIndex < currentOffset) {
@@ -36,6 +42,9 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
     renderScrollBar,
     onViewportChange,
   } = props;
+
+  // Validate itemHeight
+  validateItemHeight(itemHeight);
 
   const { rows: terminalRows } = useTerminalSize();
 
