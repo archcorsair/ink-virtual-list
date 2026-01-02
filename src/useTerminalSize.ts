@@ -26,6 +26,11 @@ export function useTerminalSize(): TerminalSize {
   });
 
   useEffect(() => {
+    // Skip resize listener in non-TTY environments (CI, pipes)
+    if (!stdout.isTTY) {
+      return;
+    }
+
     const handleResize = () => {
       setSize({
         rows: stdout.rows ?? DEFAULT_ROWS,
