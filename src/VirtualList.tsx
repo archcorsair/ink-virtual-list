@@ -6,6 +6,23 @@ import { useTerminalSize } from "./useTerminalSize";
 const DEFAULT_HEIGHT = 10;
 const DEFAULT_ITEM_HEIGHT = 1;
 
+/**
+ * Attempts to extract a stable key from an item.
+ * Checks for 'id' or 'key' properties on objects before falling back to index.
+ */
+function getDefaultKey<T>(item: T, index: number): string {
+  if (item && typeof item === "object") {
+    const obj = item as Record<string, unknown>;
+    if ("id" in obj && (typeof obj.id === "string" || typeof obj.id === "number")) {
+      return String(obj.id);
+    }
+    if ("key" in obj && (typeof obj.key === "string" || typeof obj.key === "number")) {
+      return String(obj.key);
+    }
+  }
+  return String(index);
+}
+
 export function validateItemHeight(itemHeight: number): void {
   if (!Number.isInteger(itemHeight) || itemHeight < 1) {
     throw new Error(`[ink-virtual-list] itemHeight must be a positive integer, got: ${itemHeight}`);
@@ -170,7 +187,7 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
 
       {visibleItems.map((item, idx) => {
         const actualIndex = viewportOffset + idx;
-        const key = keyExtractor ? keyExtractor(item, actualIndex) : String(actualIndex);
+        const key = keyExtractor ? keyExtractor(item, actualIndex) : getDefaultKey(item, actualIndex);
 
         const itemProps: RenderItemProps<T> = {
           item,
