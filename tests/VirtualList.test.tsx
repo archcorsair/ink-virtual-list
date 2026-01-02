@@ -21,4 +21,22 @@ describe("VirtualList", () => {
     expect(frame).toContain("Item 2");
     expect(frame).not.toContain("Item 3");
   });
+
+  test("clips items to itemHeight with overflow hidden", () => {
+    const items = ["Short", "This is a very long item that would wrap"];
+    const { lastFrame } = render(
+      <VirtualList
+        items={items}
+        height={2}
+        itemHeight={1}
+        showOverflowIndicators={false}
+        renderItem={({ item }) => <Text>{item}</Text>}
+      />,
+    );
+
+    const frame = lastFrame() ?? "";
+    // Both items should be on separate lines, not wrapped
+    const lines = frame.split("\n").filter(Boolean);
+    expect(lines.length).toBeLessThanOrEqual(2);
+  });
 });

@@ -177,7 +177,11 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
           isSelected: actualIndex === clampedSelectedIndex,
         };
 
-        return <Box key={key}>{renderItem(itemProps)}</Box>;
+        return (
+          <Box key={key} height={resolvedItemHeight} overflow="hidden">
+            {renderItem(itemProps)}
+          </Box>
+        );
       })}
 
       {showOverflowIndicators && overflowBottom > 0 && bottomIndicator(overflowBottom)}
