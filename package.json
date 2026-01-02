@@ -4,8 +4,7 @@
   "description": "A virtualized list component for Ink terminal applications",
   "type": "module",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
