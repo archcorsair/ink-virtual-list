@@ -10,7 +10,8 @@
       "Bash(bun run typecheck:*)",
       "Bash(bun run lint)",
       "mcp__context7__resolve-library-id",
-      "mcp__context7__query-docs"
+      "mcp__context7__query-docs",
+      "Bash(bun pm:*)"
     ]
   }
 }
