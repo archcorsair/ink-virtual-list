@@ -23,12 +23,26 @@ function getDefaultKey<T>(item: T, index: number): string {
   return String(index);
 }
 
+/**
+ * Validates that itemHeight is a positive integer.
+ * Throws an error if invalid.
+ *
+ * @param itemHeight - The height to validate
+ */
 export function validateItemHeight(itemHeight: number): void {
   if (!Number.isInteger(itemHeight) || itemHeight < 1) {
     throw new Error(`[ink-virtual-list] itemHeight must be a positive integer, got: ${itemHeight}`);
   }
 }
 
+/**
+ * Calculates the new viewport offset (scroll position) to ensure the selected index is visible.
+ *
+ * @param selectedIndex - The currently selected item index
+ * @param currentOffset - The current viewport offset (top visible index)
+ * @param visibleCount - The number of items that fit in the viewport
+ * @returns The new offset, clamped to ensure the selection is visible
+ */
 function calculateViewportOffset(selectedIndex: number, currentOffset: number, visibleCount: number): number {
   // Selection above viewport - scroll up
   if (selectedIndex < currentOffset) {
@@ -44,6 +58,10 @@ function calculateViewportOffset(selectedIndex: number, currentOffset: number, v
   return currentOffset;
 }
 
+/**
+ * Inner component for VirtualList.
+ * Handles the actual rendering logic, state management, and ref exposure.
+ */
 function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef<VirtualListRef>): React.JSX.Element {
   const {
     items,
@@ -209,6 +227,20 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
   );
 }
 
+/**
+ * A virtualized list component for Ink.
+ *
+ * Efficiently renders large lists by only rendering items currently visible in the viewport.
+ * Supports keyboard navigation, scrolling, and dynamic resizing.
+ *
+ * @example
+ * ```tsx
+ * <VirtualList
+ *   items={['Item 1', 'Item 2']}
+ *   renderItem={({item}) => <Text>{item}</Text>}
+ * />
+ * ```
+ */
 export const VirtualList = forwardRef(VirtualListInner) as <T>(
   props: VirtualListProps<T> & { ref?: React.ForwardedRef<VirtualListRef> },
 ) => ReturnType<typeof VirtualListInner>;
