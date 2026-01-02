@@ -1,6 +1,6 @@
 {
   "name": "ink-virtual-list",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A virtualized list component for Ink terminal applications",
   "type": "module",
   "files": [
