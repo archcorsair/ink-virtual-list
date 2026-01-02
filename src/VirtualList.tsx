@@ -70,32 +70,23 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
   // Clamp selectedIndex to valid range
   const clampedSelectedIndex = Math.max(0, Math.min(selectedIndex, items.length - 1));
 
-  // Calculate viewport offset - use useMemo to derive from selectedIndex
-  // This ensures the viewport is always in sync with selection
-  const calculatedOffset = useMemo(() => {
+  // Lazy initial offset - positions selection at bottom of viewport if needed
+  const [viewportOffset, setViewportOffset] = useState(() => {
     if (items.length === 0) return 0;
-
     const maxOffset = Math.max(0, items.length - visibleCount);
-
-    // Calculate what offset would show the selected item
-    let offset = 0;
-
-    // Selection below viewport - scroll down
     if (clampedSelectedIndex >= visibleCount) {
-      offset = clampedSelectedIndex - visibleCount + 1;
+      return Math.min(clampedSelectedIndex - visibleCount + 1, maxOffset);
     }
+    return 0;
+  });
 
-    return Math.min(Math.max(0, offset), maxOffset);
-  }, [items.length, visibleCount, clampedSelectedIndex]);
-
-  const [viewportOffset, setViewportOffset] = useState(calculatedOffset);
-
-  // Sync viewportOffset when selection changes
+  // Sync viewport when selection changes
   useEffect(() => {
-    const newOffset = calculateViewportOffset(clampedSelectedIndex, viewportOffset, visibleCount);
-    if (newOffset !== viewportOffset) {
-      const maxOffset = Math.max(0, items.length - visibleCount);
-      setViewportOffset(Math.min(newOffset, maxOffset));
+    const maxOffset = Math.max(0, items.length - visibleCount);
+    const targetOffset = calculateViewportOffset(clampedSelectedIndex, viewportOffset, visibleCount);
+    const clampedOffset = Math.min(Math.max(0, targetOffset), maxOffset);
+    if (clampedOffset !== viewportOffset) {
+      setViewportOffset(clampedOffset);
     }
   }, [clampedSelectedIndex, viewportOffset, visibleCount, items.length]);
 
