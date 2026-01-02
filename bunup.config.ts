@@ -5,4 +5,5 @@ export default defineConfig({
   format: "esm",
   dts: true,
   external: ["ink", "react"],
+  sourcemap: "linked",
 });
