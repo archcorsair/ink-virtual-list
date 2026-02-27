@@ -61,6 +61,90 @@ describe("VirtualList", () => {
   });
 });
 
+describe("VirtualList anchor='bottom'", () => {
+  test("shows last items when anchor='bottom' without selectedIndex", () => {
+    const items = Array.from({ length: 10 }, (_, i) => `Item ${i}`);
+    const { lastFrame } = render(
+      <VirtualList
+        items={items}
+        height={5}
+        anchor="bottom"
+        showOverflowIndicators={false}
+        renderItem={({ item, isSelected }) => (
+          <Text>
+            {isSelected ? "> " : "  "}
+            {item}
+          </Text>
+        )}
+      />,
+    );
+
+    const frame = lastFrame() ?? "";
+    expect(frame).toContain("Item 5");
+    expect(frame).toContain("Item 6");
+    expect(frame).toContain("Item 7");
+    expect(frame).toContain("Item 8");
+    expect(frame).toContain("> Item 9");
+    expect(frame).not.toContain("Item 0");
+    expect(frame).not.toContain("Item 4");
+  });
+
+  test("follows selection when anchor='bottom' with explicit selectedIndex", () => {
+    const items = Array.from({ length: 10 }, (_, i) => `Item ${i}`);
+    const { lastFrame } = render(
+      <VirtualList
+        items={items}
+        height={5}
+        anchor="bottom"
+        selectedIndex={2}
+        showOverflowIndicators={false}
+        renderItem={({ item }) => <Text>{item}</Text>}
+      />,
+    );
+
+    const frame = lastFrame() ?? "";
+    // selectedIndex=2 should be visible, starting from top
+    expect(frame).toContain("Item 0");
+    expect(frame).toContain("Item 2");
+    expect(frame).not.toContain("Item 9");
+  });
+
+  test("stays anchored at bottom when items grow", () => {
+    const items = Array.from({ length: 10 }, (_, i) => `Item ${i}`);
+    const { lastFrame, rerender } = render(
+      <VirtualList
+        items={items}
+        height={5}
+        anchor="bottom"
+        showOverflowIndicators={false}
+        renderItem={({ item }) => <Text>{item}</Text>}
+      />,
+    );
+
+    // Verify initially at bottom
+    let frame = lastFrame() ?? "";
+    expect(frame).toContain("Item 9");
+    expect(frame).not.toContain("Item 0");
+
+    // Add more items at the end
+    const moreItems = Array.from({ length: 15 }, (_, i) => `Item ${i}`);
+    rerender(
+      <VirtualList
+        items={moreItems}
+        height={5}
+        anchor="bottom"
+        showOverflowIndicators={false}
+        renderItem={({ item }) => <Text>{item}</Text>}
+      />,
+    );
+
+    frame = lastFrame() ?? "";
+    expect(frame).toContain("Item 10");
+    expect(frame).toContain("Item 14");
+    expect(frame).not.toContain("Item 0");
+  });
+});
+
 describe("validateItemHeight", () => {
   test("throws on itemHeight of 0", () => {
     expect(() => validateItemHeight(0)).toThrow("itemHeight must be a positive integer");

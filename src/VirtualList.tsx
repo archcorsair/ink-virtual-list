@@ -66,8 +66,8 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
   const {
     items,
     renderItem,
-    selectedIndex = 0,
     keyExtractor,
+    anchor = "top",
     height = DEFAULT_HEIGHT,
     reservedLines = 0,
     itemHeight = DEFAULT_ITEM_HEIGHT,
@@ -102,6 +102,9 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
   // Calculate how many items fit in viewport
   const visibleCount = Math.floor(availableHeight / resolvedItemHeight);
 
+  const hasExplicitSelection = props.selectedIndex !== undefined;
+  const selectedIndex = props.selectedIndex ?? (anchor === "bottom" ? items.length - 1 : 0);
+
   // Clamp selectedIndex to valid range
   const clampedSelectedIndex = Math.max(0, Math.min(selectedIndex, items.length - 1));
 
@@ -109,30 +112,45 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
   const [viewportOffset, setViewportOffset] = useState(() => {
     if (items.length === 0) return 0;
     const maxOffset = Math.max(0, items.length - visibleCount);
+    if (anchor === "bottom" && !hasExplicitSelection) {
+      return maxOffset;
+    }
     if (clampedSelectedIndex >= visibleCount) {
       return Math.min(clampedSelectedIndex - visibleCount + 1, maxOffset);
     }
     return 0;
   });
 
+  // When anchor="bottom" without explicit selection, always derive offset to stay at bottom
+  const bottomAnchorOffset =
+    anchor === "bottom" && !hasExplicitSelection ? Math.max(0, items.length - visibleCount) : undefined;
+  const effectiveOffset = bottomAnchorOffset ?? viewportOffset;
+
   // Sync viewport when selection changes
   useEffect(() => {
+    if (bottomAnchorOffset !== undefined) {
+      // Keep state in sync for imperative methods, but rendering uses effectiveOffset
+      if (viewportOffset !== bottomAnchorOffset) {
+        setViewportOffset(bottomAnchorOffset);
+      }
+      return;
+    }
     const maxOffset = Math.max(0, items.length - visibleCount);
     const targetOffset = calculateViewportOffset(clampedSelectedIndex, viewportOffset, visibleCount);
     const clampedOffset = Math.min(Math.max(0, targetOffset), maxOffset);
     if (clampedOffset !== viewportOffset) {
       setViewportOffset(clampedOffset);
     }
-  }, [clampedSelectedIndex, viewportOffset, visibleCount, items.length]);
+  }, [clampedSelectedIndex, viewportOffset, visibleCount, items.length, bottomAnchorOffset]);
 
   // Build viewport state
   const viewport: ViewportState = useMemo(
     () => ({
-      offset: viewportOffset,
+      offset: effectiveOffset,
       visibleCount,
       totalCount: items.length,
     }),
-    [viewportOffset, visibleCount, items.length],
+    [effectiveOffset, visibleCount, items.length],
   );
 
   // Notify on viewport change
@@ -159,7 +177,7 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
             newOffset = clampedIndex - visibleCount + 1;
             break;
           default: // 'auto'
-            newOffset = calculateViewportOffset(clampedIndex, viewportOffset, visibleCount);
+            newOffset = calculateViewportOffset(clampedIndex, effectiveOffset, visibleCount);
         }
 
         const maxOffset = Math.max(0, items.length - visibleCount);
@@ -174,15 +192,15 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
         });
       },
     }),
-    [items.length, visibleCount, viewportOffset, viewport],
+    [items.length, visibleCount, effectiveOffset, viewport],
   );
 
   // Calculate overflow counts
-  const overflowTop = viewportOffset;
-  const overflowBottom = Math.max(0, items.length - viewportOffset - visibleCount);
+  const overflowTop = effectiveOffset;
+  const overflowBottom = Math.max(0, items.length - effectiveOffset - visibleCount);
 
   // Get visible items
-  const visibleItems = items.slice(viewportOffset, viewportOffset + visibleCount);
+  const visibleItems = items.slice(effectiveOffset, effectiveOffset + visibleCount);
 
   // Default overflow renderers (paddingLeft aligns with list content)
   const defaultOverflowTop = (count: number) => (
@@ -204,7 +222,7 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
       {showOverflowIndicators && overflowTop >= overflowIndicatorThreshold && topIndicator(overflowTop)}
 
       {visibleItems.map((item, idx) => {
-        const actualIndex = viewportOffset + idx;
+        const actualIndex = effectiveOffset + idx;
         const key = keyExtractor ? keyExtractor(item, actualIndex) : getDefaultKey(item, actualIndex);
 
         const itemProps: RenderItemProps<T> = {

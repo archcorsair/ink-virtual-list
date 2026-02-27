@@ -38,6 +38,9 @@ export interface VirtualListProps<T> {
   /** Function to extract a unique key for each item */
   keyExtractor?: (item: T, index: number) => string;
 
+  /** Whether the list is anchored scrolled to the top or bottom (default: "top") */
+  anchor?: "top" | "bottom";
+
   /** Fixed height in lines, or "auto" to fill available terminal space (default: 10) */
   height?: number | "auto";
   /** Lines to reserve when using height="auto" (e.g., for headers/footers) */
