@@ -55,9 +55,63 @@ describe("VirtualList", () => {
     const frame = lastFrame() ?? "";
     // With height=5, indicators take 2 lines, 3 items visible
     // overflowTop = 0, overflowBottom = 7
-    // Threshold is 3, so bottom should show (7 >= 3), top should not (0 < 3)
+    // Threshold is 3, so bottom should show (7 >= 3), top renders a blank placeholder (0 < 3)
     expect(frame).toContain("▼");
     expect(frame).not.toContain("▲");
+    // The hidden top indicator still occupies its line, so total height stays at `height`
+    expect(frame.split("\n").length).toBe(5);
+  });
+
+  test("renders a constant number of lines at every scroll position", () => {
+    const items = Array.from({ length: 50 }, (_, i) => `Item ${i}`);
+    const renderAt = (selectedIndex: number) => {
+      const { lastFrame } = render(
+        <VirtualList
+          items={items}
+          height={8}
+          selectedIndex={selectedIndex}
+          renderItem={({ item }) => <Text>{item}</Text>}
+        />,
+      );
+      return (lastFrame() ?? "").split("\n").length;
+    };
+
+    // Top (no top overflow), middle (both), bottom (no bottom overflow)
+    const top = renderAt(0);
+    const middle = renderAt(25);
+    const bottom = renderAt(items.length - 1);
+
+    expect(top).toBe(8);
+    expect(middle).toBe(8);
+    expect(bottom).toBe(8);
+  });
+
+  test("renders an item at height=2 with indicators enabled by default", () => {
+    const items = Array.from({ length: 10 }, (_, i) => `Item ${i}`);
+    const { lastFrame } = render(
+      <VirtualList items={items} height={2} renderItem={({ item }) => <Text>{item}</Text>} />,
+    );
+
+    const frame = lastFrame() ?? "";
+    // height=2 leaves no room for indicators plus an item, so indicators are dropped
+    expect(frame).toContain("Item 0");
+  });
+
+  test("renders an item at height=1 with indicators enabled by default", () => {
+    const items = Array.from({ length: 10 }, (_, i) => `Item ${i}`);
+    const { lastFrame } = render(
+      <VirtualList items={items} height={1} renderItem={({ item }) => <Text>{item}</Text>} />,
+    );
+
+    const frame = lastFrame() ?? "";
+    expect(frame).toContain("Item 0");
+    expect(frame).not.toContain("▼");
+  });
+
+  test("renders nothing for an empty list", () => {
+    const { lastFrame } = render(<VirtualList items={[]} height={5} renderItem={({ item }) => <Text>{item}</Text>} />);
+
+    expect(lastFrame() ?? "").not.toContain("more");
   });
 });
 
