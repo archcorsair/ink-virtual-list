@@ -117,10 +117,23 @@ function App() {
 - **`reservedLines?: number`** - Lines to reserve when using `height="auto"` (default: `0`)
 - **`itemHeight?: number`** - Height of each item in lines (default: `1`)
 - **`showOverflowIndicators?: boolean`** - Show "N more" indicators (default: `true`)
+- **`overflowIndicatorThreshold?: number`** - Minimum overflow count before showing indicators (default: `1`)
 - **`renderOverflowTop?: (count: number) => ReactNode`** - Custom top overflow indicator
 - **`renderOverflowBottom?: (count: number) => ReactNode`** - Custom bottom overflow indicator
 - **`renderScrollBar?: (viewport: ViewportState) => ReactNode`** - Custom scrollbar renderer
 - **`onViewportChange?: (viewport: ViewportState) => void`** - Callback when viewport changes
+
+#### Height Budget
+
+`height` is the total rendered height of the list. When overflow indicators are enabled they are
+part of that budget: they consume 2 of `height`'s lines (one at the top, one at the bottom), leaving
+`height - 2` lines for items. A hidden indicator — at the list edges, or below
+`overflowIndicatorThreshold` — still occupies its line as a blank placeholder, so the list never
+changes height while you scroll and surrounding UI stays put.
+
+If `height` is too small to fit both indicator lines plus one item (i.e. `height - 2 < itemHeight`),
+indicators are automatically disabled for that render and the full height goes to items, so tiny
+heights such as `height={1}` still render an item instead of nothing.
 
 ### Ref Methods
 

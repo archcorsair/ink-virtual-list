@@ -25,3 +25,9 @@ jobs:
 
     - name: Run tests
       run: bun test --only-failures
+
+    - name: Typecheck
+      run: bun run typecheck
+
+    - name: Lint
+      run: bun run lint

@@ -6,6 +6,35 @@ import { useTerminalSize } from "./useTerminalSize";
 const DEFAULT_HEIGHT = 10;
 const DEFAULT_ITEM_HEIGHT = 1;
 
+/** Lines consumed by the overflow indicator slots when they are enabled (one top, one bottom). */
+const INDICATOR_LINES = 2;
+
+/** Default top overflow indicator (paddingLeft aligns with list content). */
+function defaultOverflowTop(count: number): React.JSX.Element {
+  return (
+    <Box paddingLeft={2}>
+      <Text dimColor>▲ {count} more</Text>
+    </Box>
+  );
+}
+
+/** Default bottom overflow indicator (paddingLeft aligns with list content). */
+function defaultOverflowBottom(count: number): React.JSX.Element {
+  return (
+    <Box paddingLeft={2}>
+      <Text dimColor>▼ {count} more</Text>
+    </Box>
+  );
+}
+
+/**
+ * Blank stand-in rendered in an indicator slot when that indicator is hidden, so the
+ * list's total rendered height stays constant while scrolling.
+ */
+function indicatorPlaceholder(): React.JSX.Element {
+  return <Box height={1} />;
+}
+
 /**
  * Attempts to extract a stable key from an item.
  * Checks for 'id' or 'key' properties on objects before falling back to index.
@@ -93,14 +122,13 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
     return Math.max(1, terminalRows - reservedLines);
   }, [height, terminalRows, reservedLines]);
 
-  const resolvedItemHeight = itemHeight ?? DEFAULT_ITEM_HEIGHT;
+  // Indicators cost 2 lines of the height budget. If reserving them would leave no room
+  // for even a single item, drop them for this render and give the full height to items.
+  const indicatorsEnabled = showOverflowIndicators && resolvedHeight - INDICATOR_LINES >= itemHeight;
+  const availableHeight = Math.max(0, resolvedHeight - (indicatorsEnabled ? INDICATOR_LINES : 0));
 
-  // Reserve space for overflow indicators within the height budget
-  const indicatorLines = showOverflowIndicators ? 2 : 0;
-  const availableHeight = Math.max(0, resolvedHeight - indicatorLines);
-
-  // Calculate how many items fit in viewport
-  const visibleCount = Math.floor(availableHeight / resolvedItemHeight);
+  // Calculate how many items fit in viewport (always show at least one when there are items)
+  const visibleCount = Math.max(items.length > 0 ? 1 : 0, Math.floor(availableHeight / itemHeight));
 
   // Clamp selectedIndex to valid range
   const clampedSelectedIndex = Math.max(0, Math.min(selectedIndex, items.length - 1));
@@ -184,24 +212,13 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
   // Get visible items
   const visibleItems = items.slice(viewportOffset, viewportOffset + visibleCount);
 
-  // Default overflow renderers (paddingLeft aligns with list content)
-  const defaultOverflowTop = (count: number) => (
-    <Box paddingLeft={2}>
-      <Text dimColor>▲ {count} more</Text>
-    </Box>
-  );
-  const defaultOverflowBottom = (count: number) => (
-    <Box paddingLeft={2}>
-      <Text dimColor>▼ {count} more</Text>
-    </Box>
-  );
-
   const topIndicator = renderOverflowTop ?? defaultOverflowTop;
   const bottomIndicator = renderOverflowBottom ?? defaultOverflowBottom;
 
   return (
     <Box flexDirection="column">
-      {showOverflowIndicators && overflowTop >= overflowIndicatorThreshold && topIndicator(overflowTop)}
+      {indicatorsEnabled &&
+        (overflowTop >= overflowIndicatorThreshold ? topIndicator(overflowTop) : indicatorPlaceholder())}
 
       {visibleItems.map((item, idx) => {
         const actualIndex = viewportOffset + idx;
@@ -214,13 +231,14 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
         };
 
         return (
-          <Box key={key} height={resolvedItemHeight} overflow="hidden">
+          <Box key={key} height={itemHeight} overflow="hidden">
             {renderItem(itemProps)}
           </Box>
         );
       })}
 
-      {showOverflowIndicators && overflowBottom >= overflowIndicatorThreshold && bottomIndicator(overflowBottom)}
+      {indicatorsEnabled &&
+        (overflowBottom >= overflowIndicatorThreshold ? bottomIndicator(overflowBottom) : indicatorPlaceholder())}
 
       {renderScrollBar?.(viewport)}
     </Box>
@@ -231,7 +249,7 @@ function VirtualListInner<T>(props: VirtualListProps<T>, ref: React.ForwardedRef
  * A virtualized list component for Ink.
  *
  * Efficiently renders large lists by only rendering items currently visible in the viewport.
- * Supports keyboard navigation, scrolling, and dynamic resizing.
+ * Scrolling follows `selectedIndex`, and the viewport resizes with the terminal.
  *
  * @example
  * ```tsx
