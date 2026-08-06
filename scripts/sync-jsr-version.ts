@@ -15,7 +15,8 @@ const packageJsonPath = join(repoRoot, "package.json");
 const jsrJsonPath = join(repoRoot, "jsr.json");
 
 const packageJson = await Bun.file(packageJsonPath).json();
-const jsrJson = await Bun.file(jsrJsonPath).json();
+const jsrJsonText = await Bun.file(jsrJsonPath).text();
+const jsrJson = JSON.parse(jsrJsonText);
 
 const version: unknown = packageJson.version;
 if (typeof version !== "string" || version.length === 0) {
@@ -28,8 +29,11 @@ if (jsrJson.version === version) {
   process.exit(0);
 }
 
-const previous = jsrJson.version;
-jsrJson.version = version;
-await Bun.write(jsrJsonPath, `${JSON.stringify(jsrJson, null, 2)}\n`);
+const updated = jsrJsonText.replace(/("version"\s*:\s*")[^"]*(")/, `$1${version}$2`);
+if (updated === jsrJsonText) {
+  console.error(`[sync:jsr] failed to rewrite the "version" field in jsr.json`);
+  process.exit(1);
+}
+await Bun.write(jsrJsonPath, updated);
 
-console.log(`[sync:jsr] jsr.json version ${previous} -> ${version}`);
+console.log(`[sync:jsr] jsr.json version ${jsrJson.version} -> ${version}`);
