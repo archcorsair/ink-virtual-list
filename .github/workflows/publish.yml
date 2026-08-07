@@ -101,7 +101,9 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           npm_ok=0
           jsr_ok=0
-          for attempt in 1 2 3 4 5; do
+          # Registry metadata propagation can lag over a minute after a successful
+          # publish (observed with JSR's meta.json on v0.3.0), so allow up to 5 minutes.
+          for attempt in $(seq 1 30); do
             if [ "$npm_ok" -eq 0 ]; then
               if curl -fsSL "https://registry.npmjs.org/ink-virtual-list" \
                 | jq -e --arg v "$VERSION" '.versions | has($v)' >/dev/null 2>&1; then
