@@ -8,8 +8,13 @@ on:
 
 jobs:
   test:
-    name: Run Tests
+    name: Run Tests (ink ${{ matrix.ink }})
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ink: ['6', '7']
 
     steps:
     - name: Checkout code
@@ -23,6 +28,10 @@ jobs:
     - name: Install dependencies
       run: bun install --frozen-lockfile
 
+    - name: Install ink 7
+      if: matrix.ink == '7'
+      run: bun add -d ink@^7.1.1
+
     - name: Run tests
       run: bun test --only-failures
 
@@ -30,4 +39,5 @@ jobs:
       run: bun run typecheck
 
     - name: Lint
+      if: matrix.ink == '6'
       run: bun run lint

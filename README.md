@@ -25,6 +25,19 @@ npx jsr add @archcorsair/ink-virtual-list
 bun add ink-virtual-list
 ```
 
+## Compatibility
+
+Works with Ink `^6.0.0 || ^7.0.0`. Both majors are tested in CI on every push.
+
+The `react` peer is `^19.0.0`, but Ink imposes its own floor on top of that: Ink 6 needs React `^19`,
+while Ink 7 requires React `>=19.2` and Node `>=22`. Install whichever Ink major you want and let its
+peers pull in the React/Node versions it needs.
+
+> **JSR note:** JSR's manifest parser only accepts a single version requirement per import — it
+> rejects both `^6.0.0 || ^7.0.0` and `>=6.0.0 <8.0.0`. `jsr.json` therefore pins `npm:ink@^6.0.0`,
+> so JSR consumers resolve against Ink 6. The npm package carries the full `^6 || ^7` peer range, and
+> the library's source works with either major.
+
 ## Usage
 
 ### Basic Example

@@ -49,7 +49,7 @@
     "url": "https://github.com/archcorsair/ink-virtual-list"
   },
   "peerDependencies": {
-    "ink": "^6.0.0",
+    "ink": "^6.0.0 || ^7.0.0",
     "react": "^19.0.0"
   },
   "devDependencies": {
