@@ -1,3 +1,5 @@
+
+
 # ink-virtual-list
 
 A virtualized list component for [Ink](https://github.com/vadimdemedes/ink) terminal applications. Only renders visible items for optimal performance with large datasets.
@@ -125,7 +127,7 @@ function App() {
 #### Optional
 
 - **`selectedIndex?: number`** - Index of currently selected item (default: `0`)
-- **`keyExtractor?: (item: T, index: number) => string`** - Custom key extractor for list items
+- **`keyExtractor?: (item: T, index: number) => string`** - Custom key extractor for list items. If omitted, automatically falls back to `item.id`, `item.key`, or the array index.
 - **`height?: number | "auto"`** - Fixed height in lines or `"auto"` to fill terminal (default: `10`)
 - **`reservedLines?: number`** - Lines to reserve when using `height="auto"` (default: `0`)
 - **`itemHeight?: number`** - Height of each item in lines (default: `1`)
