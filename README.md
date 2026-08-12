@@ -1,5 +1,3 @@
-
-
 # ink-virtual-list
 
 A virtualized list component for [Ink](https://github.com/vadimdemedes/ink) terminal applications. Only renders visible items for optimal performance with large datasets.
