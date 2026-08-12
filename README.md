@@ -234,6 +234,10 @@ function TodoApp() {
 }
 ```
 
+## Related Projects
+
+- [ink-stepper](https://github.com/archcorsair/ink-stepper) - A step-by-step wizard/stepper component for Ink terminal applications, from the same author ([docs](https://archcorsair.github.io/ink-stepper/))
+
 ## License
 
 MIT

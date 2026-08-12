@@ -1,0 +1,17 @@
+{
+  "name": "ink-virtual-list-docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev .",
+    "build": "vitepress build .",
+    "preview": "vitepress preview ."
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "vitepress": "2.0.0-alpha.19",
+    "vitepress-plugin-group-icons": "^1.7.6",
+    "vitepress-plugin-llms": "^1.13.4"
+  }
+}

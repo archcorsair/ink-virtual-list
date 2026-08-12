@@ -1,0 +1,21 @@
+:root {
+  --vp-c-brand-1: #0891b2;
+  --vp-c-brand-2: #06b6d4;
+  --vp-c-brand-3: #0e7490;
+}
+
+.dark {
+  --vp-c-brand-1: #67e8f9;
+  --vp-c-brand-2: #22d3ee;
+  --vp-c-brand-3: #06b6d4;
+}
+
+/* Keep the local search input neutral/transparent */
+.VPLocalSearchBox .search-input {
+  background-color: transparent;
+}
+
+/* Same for the nav bar search button - scoped through .VPNavBar to out-specify the theme rule */
+.VPNavBar .VPNavBarSearchButton {
+  background-color: transparent;
+}

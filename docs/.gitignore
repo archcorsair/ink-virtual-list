@@ -1,0 +1,6 @@
+# dependencies (bun install)
+node_modules
+
+# vitepress output
+.vitepress/dist
+.vitepress/cache
