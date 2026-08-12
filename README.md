@@ -10,6 +10,7 @@ A virtualized list component for [Ink](https://github.com/vadimdemedes/ink) term
 - **Flexible height** - Fixed height or auto-fill available terminal space
 - **Customizable indicators** - Override default overflow indicators ("▲ N more")
 - **TypeScript first** - Full type safety with generics
+- **Bottom anchoring** - Start scrolled to the bottom (great for logs, chat UIs)
 - **Imperative API** - Programmatic scrolling via ref
 
 ## Installation
@@ -89,6 +90,21 @@ function App() {
 />
 ```
 
+### Bottom-Anchored List
+
+Start the list scrolled to the bottom, with the last item selected. Useful for log viewers and chat UIs.
+
+```tsx
+<VirtualList
+  items={logLines}
+  anchor="bottom"
+  height={20}
+  renderItem={({ item }) => <Text>{item}</Text>}
+/>
+```
+
+When `selectedIndex` is explicitly provided, normal selection-following behavior applies regardless of anchor.
+
 ### Imperative Scrolling
 
 ```tsx
@@ -124,8 +140,9 @@ function App() {
 
 #### Optional
 
-- **`selectedIndex?: number`** - Index of currently selected item (default: `0`)
+- **`selectedIndex?: number`** - Index of currently selected item (default: `0`, or last item when `anchor="bottom"`)
 - **`keyExtractor?: (item: T, index: number) => string`** - Custom key extractor for list items
+- **`anchor?: "top" | "bottom"`** - Whether the list starts scrolled to the top or bottom (default: `"top"`)
 - **`height?: number | "auto"`** - Fixed height in lines or `"auto"` to fill terminal (default: `10`)
 - **`reservedLines?: number`** - Lines to reserve when using `height="auto"` (default: `0`)
 - **`itemHeight?: number`** - Height of each item in lines (default: `1`)
