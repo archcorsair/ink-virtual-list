@@ -2,6 +2,10 @@
 
 A virtualized list component for [Ink](https://github.com/vadimdemedes/ink) terminal applications. Only renders visible items for optimal performance with large datasets.
 
+![ink-virtual-list demo: a log explorer scrolling 12,847 lines](https://archcorsair.github.io/ink-virtual-list/logs.gif)
+
+_Built with `ink-virtual-list` — see the [examples gallery](https://archcorsair.github.io/ink-virtual-list/examples) for this and four more runnable apps._
+
 ## Features
 
 - **Virtualized rendering** - Only renders items visible in the viewport
